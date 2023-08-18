@@ -851,9 +851,10 @@ const startRunningDeposit = async (data, id, next) => {
   // }
 };
 
-const increaseEarnings = (activeDeposits) => {
-  if (activeDeposits.length > 0) {
-    setInterval(() => {
+const increaseEarnings = () => {
+  setInterval(async () => {
+    const activeDeposits = await Active.find();
+    if (activeDeposits.length > 0) {
       activeDeposits.forEach(async (el) => {
         const daysRemaining = el.daysRemaining * 1 - el.planCycle * 1;
         if (daysRemaining > 0) {
@@ -870,8 +871,8 @@ const increaseEarnings = (activeDeposits) => {
           console.log("Deposit deleted");
         }
       });
-    }, 120000);
-  }
+    }
+  }, 120000);
 };
 
 exports.checkActive = catchAsync(async (req, res, next) => {
@@ -907,5 +908,5 @@ exports.checkActive = catchAsync(async (req, res, next) => {
   //   });
   // }
 
-  increaseEarnings(activeDeposits);
+  increaseEarnings();
 });
