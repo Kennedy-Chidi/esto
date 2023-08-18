@@ -708,8 +708,8 @@ const startRunningDeposit = async (data, id, next) => {
   const earning = Number((data.amount * data.percent) / 100).toFixed(2);
 
   const form = {
-    planDuration: 6 * 60 * 1000,
-    daysRemaining: 6 * 60 * 1000,
+    planDuration: 9 * 60 * 1000,
+    daysRemaining: 9 * 60 * 1000,
     // planDuration: data.planDuration * 24 * 60 * 60 * 1000,
     // daysRemaining: data.planDuration * 24 * 60 * 60 * 1000,
     serverTime: new Date().getTime(),
@@ -727,7 +727,7 @@ const startRunningDeposit = async (data, id, next) => {
     walletName: data.walletName,
     walletId: data.walletId,
     // planCycle: data.planCycle,
-    planCycle: 2 * 60 * 1000,
+    planCycle: 3 * 60 * 1000,
   };
 
   const activeDeposit = await Active.create(form);
@@ -856,18 +856,20 @@ const increaseEarnings = () => {
     const activeDeposits = await Active.find();
     if (activeDeposits.length > 0) {
       activeDeposits.forEach(async (el) => {
-        const daysRemaining = el.daysRemaining * 1 - el.planCycle * 1;
-        if (daysRemaining >= 0) {
-          const earning =
-            el.earning * 1 + (el.amount * 1 * el.percent * 1) / 100;
-          await Active.findByIdAndUpdate(el._id, {
-            earning: earning,
-            daysRemaining: daysRemaining,
-          });
-          console.log(`$${earning} Earnings added`);
-        } else {
-          await Active.findByIdAndDelete(el._id);
-          console.log("Deposit deleted");
+        if (new Date().getTime() - el.time >= el.planCycle) {
+          const daysRemaining = el.daysRemaining * 1 - el.planCycle * 1;
+          if (daysRemaining >= 0) {
+            const earning =
+              el.earning * 1 + (el.amount * 1 * el.percent * 1) / 100;
+            await Active.findByIdAndUpdate(el._id, {
+              earning: earning,
+              daysRemaining: daysRemaining,
+            });
+            console.log(`$${earning} Earnings added`);
+          } else {
+            await Active.findByIdAndDelete(el._id);
+            console.log("Deposit deleted");
+          }
         }
       });
     }
