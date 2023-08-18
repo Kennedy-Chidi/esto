@@ -896,22 +896,21 @@ const increaseEarnings = () => {
             });
             console.log(`$${earning} Earnings updated for ${el.username}`);
           } else {
-          }
-        } else {
-          await Active.findByIdAndDelete(el._id);
-          console.log("Deposit deleted");
-          await User.findOneAndUpdate(
-            { username: el.username },
-            {
-              $inc: { totalBalance: el.amount },
-            }
-          );
+            await Active.findByIdAndDelete(el._id);
+            console.log("Deposit deleted");
+            await User.findOneAndUpdate(
+              { username: el.username },
+              {
+                $inc: { totalBalance: el.amount },
+              }
+            );
 
-          await Wallet.findByIdAndUpdate(el.walletId, {
-            $inc: {
-              balance: el.amount,
-            },
-          });
+            await Wallet.findByIdAndUpdate(el.walletId, {
+              $inc: {
+                balance: el.amount,
+              },
+            });
+          }
         }
       });
     } else {
