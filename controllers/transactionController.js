@@ -853,8 +853,8 @@ const startRunningDeposit = async (data, id, next) => {
 
 const increaseEarnings = (activeDeposits) => {
   if (activeDeposits.length > 0) {
-    activeDeposits.forEach((el) => {
-      setInterval(async () => {
+    setInterval(() => {
+      activeDeposits.forEach(async (el) => {
         const daysRemaining = el.daysRemaining * 1 - el.planCycle * 1;
         if (daysRemaining > 0) {
           const earning =
@@ -869,8 +869,8 @@ const increaseEarnings = (activeDeposits) => {
           await Active.findByIdAndDelete(el._id);
           console.log("Deposit deleted");
         }
-      }, 120000);
-    });
+      });
+    }, 120000);
   }
 };
 
