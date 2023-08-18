@@ -856,7 +856,7 @@ const increaseEarnings = () => {
     const activeDeposits = await Active.find();
     if (activeDeposits.length > 0) {
       activeDeposits.forEach(async (el) => {
-        if (el.daysRemaining > 0) {
+        if (el.daysRemaining >= 0) {
           const daysRemaining = el.daysRemaining * 1 - el.planCycle * 1;
           const earning =
             el.earning * 1 + (el.amount * 1 * el.percent * 1) / 100;
