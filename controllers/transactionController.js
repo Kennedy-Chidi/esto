@@ -710,10 +710,10 @@ const startRunningDeposit = async (data, id, next) => {
   const earning = Number((data.amount * data.percent) / 100).toFixed(2);
 
   const form = {
-    // planDuration: 9 * 60 * 1000,
-    // daysRemaining: 9 * 60 * 1000,
-    planDuration: data.planDuration * 24 * 60 * 60 * 1000,
-    daysRemaining: data.planDuration * 24 * 60 * 60 * 1000,
+    planDuration: 12 * 60 * 1000,
+    daysRemaining: 12 * 60 * 1000,
+    // planDuration: data.planDuration * 24 * 60 * 60 * 1000,
+    // daysRemaining: data.planDuration * 24 * 60 * 60 * 1000,
     serverTime: new Date().getTime(),
     earning: 0,
     time: new Date().getTime(),
@@ -728,7 +728,8 @@ const startRunningDeposit = async (data, id, next) => {
     referredBy: data.referredBy,
     walletName: data.walletName,
     walletId: data.walletId,
-    planCycle: data.planCycle,
+    planCycle: 3 * 60 * 1000,
+    // planCycle: data.planCycle,
   };
 
   const activeDeposit = await Active.create(form);
@@ -867,10 +868,48 @@ const increaseEarnings = () => {
               daysRemaining: daysRemaining,
               serverTime: new Date().getTime(),
             });
+            const form = {
+              symbol: el.symbol,
+              depositId: el._id,
+              username: el.username,
+              amount: el.amount,
+              earning: el.earning,
+              image: el.image,
+              online: el.online,
+              referredBy: el.referralUsername,
+              walletName: el.walletName,
+              walletId: el.walletId,
+              time: el.time,
+            };
+            await Earning.create(form);
+            await User.findOneAndUpdate(
+              { username: el.username },
+              {
+                $inc: { totalBalance: form.earning },
+              }
+            );
+
+            await Wallet.findByIdAndUpdate(el.walletId, {
+              $inc: {
+                balance: form.earning,
+              },
+            });
             console.log(`$${earning} Earnings updated for ${el.username}`);
           } else {
             await Active.findByIdAndDelete(el._id);
             console.log("Deposit deleted");
+            await User.findOneAndUpdate(
+              { username: el.username },
+              {
+                $inc: { totalBalance: el.amount },
+              }
+            );
+
+            await Wallet.findByIdAndUpdate(el.walletId, {
+              $inc: {
+                balance: el.amount,
+              },
+            });
           }
         }
       });
