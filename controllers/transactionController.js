@@ -125,14 +125,16 @@ exports.createTransaction = catchAsync(async (req, res, next) => {
         },
       });
 
-      startActiveDeposit(
-        activeDeposit,
-        earning,
-        data.planDuration * 1,
-        data.planCycle * 1,
-        data.user,
-        next
-      );
+      increaseEarnings();
+
+      // startActiveDeposit(
+      //   activeDeposit,
+      //   earning,
+      //   data.planDuration * 1,
+      //   data.planCycle * 1,
+      //   data.user,
+      //   next
+      // );
     } else {
       const wallet = await Wallet.findById(data.walletId);
 
@@ -708,10 +710,10 @@ const startRunningDeposit = async (data, id, next) => {
   const earning = Number((data.amount * data.percent) / 100).toFixed(2);
 
   const form = {
-    planDuration: 9 * 60 * 1000,
-    daysRemaining: 9 * 60 * 1000,
-    // planDuration: data.planDuration * 24 * 60 * 60 * 1000,
-    // daysRemaining: data.planDuration * 24 * 60 * 60 * 1000,
+    // planDuration: 9 * 60 * 1000,
+    // daysRemaining: 9 * 60 * 1000,
+    planDuration: data.planDuration * 24 * 60 * 60 * 1000,
+    daysRemaining: data.planDuration * 24 * 60 * 60 * 1000,
     serverTime: new Date().getTime(),
     earning: 0,
     time: new Date().getTime(),
@@ -726,8 +728,7 @@ const startRunningDeposit = async (data, id, next) => {
     referredBy: data.referredBy,
     walletName: data.walletName,
     walletId: data.walletId,
-    // planCycle: data.planCycle,
-    planCycle: 3 * 60 * 1000,
+    planCycle: data.planCycle,
   };
 
   const activeDeposit = await Active.create(form);
@@ -852,11 +853,11 @@ const startRunningDeposit = async (data, id, next) => {
 };
 
 const increaseEarnings = () => {
-  setInterval(async () => {
+  const startEarning = setInterval(async () => {
     const activeDeposits = await Active.find();
     if (activeDeposits.length > 0) {
       activeDeposits.forEach(async (el) => {
-        if (new Date().getTime() - el.time >= el.planCycle) {
+        if (new Date().getTime() - el.serverTime >= el.planCycle) {
           const daysRemaining = el.daysRemaining * 1 - el.planCycle * 1;
           if (daysRemaining >= 0) {
             const earning =
@@ -864,17 +865,19 @@ const increaseEarnings = () => {
             await Active.findByIdAndUpdate(el._id, {
               earning: earning,
               daysRemaining: daysRemaining,
-              time: new Date().getTime(),
+              serverTime: new Date().getTime(),
             });
-            console.log(`$${earning} Earnings added`);
+            console.log(`$${earning} Earnings updated for ${el.username}`);
           } else {
             await Active.findByIdAndDelete(el._id);
             console.log("Deposit deleted");
           }
         }
       });
+    } else {
+      clearInterval(startEarning);
     }
-  }, 120000);
+  }, 180000);
 };
 
 exports.checkActive = catchAsync(async (req, res, next) => {
