@@ -853,8 +853,8 @@ const startRunningDeposit = async (data, id, next) => {
 
 const increaseEarnings = (activeDeposits) => {
   if (activeDeposits.length > 0) {
-    activeDeposits.forEach((el, index) => {
-      setInterval(async (el) => {
+    activeDeposits.forEach((el) => {
+      setInterval(async () => {
         const daysRemaining = el.daysRemaining * 1 - el.planCycle * 1;
         if (daysRemaining > 0) {
           const earning =
