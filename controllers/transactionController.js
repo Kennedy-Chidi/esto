@@ -873,7 +873,7 @@ const increaseEarnings = () => {
               depositId: el._id,
               username: el.username,
               amount: el.amount,
-              earning: el.earning,
+              earning: (el.amount * 1 * el.percent * 1) / 100,
               image: el.image,
               online: el.online,
               referredBy: el.referralUsername,
@@ -896,21 +896,22 @@ const increaseEarnings = () => {
             });
             console.log(`$${earning} Earnings updated for ${el.username}`);
           } else {
-            await Active.findByIdAndDelete(el._id);
-            console.log("Deposit deleted");
-            await User.findOneAndUpdate(
-              { username: el.username },
-              {
-                $inc: { totalBalance: el.amount },
-              }
-            );
-
-            await Wallet.findByIdAndUpdate(el.walletId, {
-              $inc: {
-                balance: el.amount,
-              },
-            });
           }
+        } else {
+          await Active.findByIdAndDelete(el._id);
+          console.log("Deposit deleted");
+          await User.findOneAndUpdate(
+            { username: el.username },
+            {
+              $inc: { totalBalance: el.amount },
+            }
+          );
+
+          await Wallet.findByIdAndUpdate(el.walletId, {
+            $inc: {
+              balance: el.amount,
+            },
+          });
         }
       });
     } else {
