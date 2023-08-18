@@ -864,6 +864,7 @@ const increaseEarnings = () => {
             await Active.findByIdAndUpdate(el._id, {
               earning: earning,
               daysRemaining: daysRemaining,
+              time: new Date().getTime(),
             });
             console.log(`$${earning} Earnings added`);
           } else {
