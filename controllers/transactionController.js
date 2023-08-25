@@ -710,10 +710,10 @@ const startRunningDeposit = async (data, id, next) => {
   const earning = Number((data.amount * data.percent) / 100).toFixed(2);
 
   const form = {
-    planDuration: 12 * 60 * 1000,
-    daysRemaining: 12 * 60 * 1000,
-    // planDuration: data.planDuration * 24 * 60 * 60 * 1000,
-    // daysRemaining: data.planDuration * 24 * 60 * 60 * 1000,
+    // planDuration: 12 * 60 * 1000,
+    // daysRemaining: 12 * 60 * 1000,
+    planDuration: data.planDuration * 24 * 60 * 60 * 1000,
+    daysRemaining: data.planDuration * 24 * 60 * 60 * 1000,
     serverTime: new Date().getTime(),
     earning: 0,
     time: new Date().getTime(),
@@ -728,8 +728,8 @@ const startRunningDeposit = async (data, id, next) => {
     referredBy: data.referredBy,
     walletName: data.walletName,
     walletId: data.walletId,
-    planCycle: 3 * 60 * 1000,
-    // planCycle: data.planCycle,
+    // planCycle: 3 * 60 * 1000,
+    planCycle: data.planCycle,
   };
 
   const activeDeposit = await Active.create(form);
@@ -741,7 +741,7 @@ const startRunningDeposit = async (data, id, next) => {
   });
 
   const activeDeposits = await Active.find();
-  increaseEarnings(activeDeposits);
+  increaseEarnings();
 
   // startActiveDeposit(
   //   activeDeposit,
@@ -904,12 +904,20 @@ const increaseEarnings = () => {
                 $inc: { totalBalance: el.amount },
               }
             );
-
             await Wallet.findByIdAndUpdate(el.walletId, {
               $inc: {
                 balance: el.amount,
               },
             });
+
+            const user = await User.findOne({ username: el.username });
+            const next = "";
+            sendTransactionEmail(
+              user,
+              `investment-completion`,
+              el.amount,
+              next
+            );
           }
         }
       });
