@@ -95,15 +95,15 @@ exports.signup = catchAsync(async (req, res, next) => {
       );
     }
 
-    const phone = await User.findOne({ email: data.phoneNumber });
-    if (phone) {
-      return next(
-        new AppError(
-          `Sorry, a user with this email ${phone.phoneNumber} already exist`,
-          500
-        )
-      );
-    }
+    // const phone = await User.findOne({ email: data.phoneNumber });
+    // if (phone) {
+    //   return next(
+    //     new AppError(
+    //       `Sorry, a user with this email ${phone.phoneNumber} already exist`,
+    //       500
+    //     )
+    //   );
+    // }
 
     if (data.autoRegister) {
       data.suspension = false;
