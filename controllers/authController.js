@@ -494,46 +494,47 @@ const prepareEmail = async (user, template, secondUser) => {
   });
   const company = await Company.findOne();
 
-  const content = email.content
-    .replace("{{company-name}}", company.companyName)
-    .replace("{{fullName}}", `${user.fullName}`)
-    .replace("{{username}}", `${secondUser.username}`);
-  const companyInfo = {
-    email: company.systemEmail,
-    username: user.username,
-  };
+  if (email) {
+    const content = email.content
+      .replace("{{company-name}}", company.companyName)
+      .replace("{{fullName}}", `${user.fullName}`)
+      .replace("{{username}}", `${secondUser.username}`);
+    const companyInfo = {
+      email: company.systemEmail,
+      username: user.username,
+    };
 
-  const resetURL = `${company.companyDomain}/confirm-registration?token=${user._id}`;
-  const banner = `${company.companyDomain}/uploads/${email.banner}`;
+    const resetURL = `${company.companyDomain}/confirm-registration?token=${user._id}`;
+    const banner = `${company.companyDomain}/uploads/${email.banner}`;
 
-  const users = [companyInfo, user];
+    const users = [companyInfo, user];
 
-  users.forEach((user) => {
-    try {
-      new SendEmail(
-        company,
-        user,
-        email,
-        banner,
-        content,
-        resetURL
-      ).sendEmail();
-    } catch (err) {
-      return next(
-        new AppError(
-          `There was an error sending the email. Try again later!, ${err}`,
-          500
-        )
-      );
-    }
-  });
+    users.forEach((user) => {
+      try {
+        new SendEmail(
+          company,
+          user,
+          email,
+          banner,
+          content,
+          resetURL
+        ).sendEmail();
+      } catch (err) {
+        return next(
+          new AppError(
+            `There was an error sending the email. Try again later!, ${err}`,
+            500
+          )
+        );
+      }
+    });
 
-  const form = {
-    username: user.username,
-    time: new Date().getTime(),
-    message: content,
-    subject: email.title,
-  };
-
+    const form = {
+      username: user.username,
+      time: new Date().getTime(),
+      message: content,
+      subject: email.title,
+    };
+  }
   await Notification.create(form);
 };
