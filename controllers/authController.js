@@ -535,6 +535,6 @@ const prepareEmail = async (user, template, secondUser) => {
       message: content,
       subject: email.title,
     };
+    await Notification.create(form);
   }
-  await Notification.create(form);
 };
