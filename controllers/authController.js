@@ -199,6 +199,8 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Please provide username and password!", 400));
   }
 
+  console.log(username, password);
+
   const user = await User.findOne({ username }).select("+password");
 
   if (!user || !(await user.correctPassword(password, user.password))) {
